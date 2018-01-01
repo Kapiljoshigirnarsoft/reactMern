@@ -1,3 +1,7 @@
+var React = require('react');
+var ReactDOM = require('react-dom');
+var $ = require('jquery');
+
 var BugFilter = React.createClass({
   render: function() {
     console.log("Rendering BugFilter");
@@ -12,7 +16,7 @@ var BugRow = React.createClass({
     console.log("Rendering BugRow:", this.props.bug);
     return (
       <tr>
-        // <td>{this.props.bug.id}</td>
+        
         <td>{this.props.bug._id}</td>
         <td>{this.props.bug.status}</td>
         <td>{this.props.bug.priority}</td>
