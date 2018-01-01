@@ -3,48 +3,65 @@ var ReactDOM = require('react-dom');
 var $ = require('jquery');
 var Link = require('react-router').Link;
 
+var Paper = require('material-ui/lib/paper');
+var Table = require('material-ui/lib/table/table');
+var TableBody = require('material-ui/lib/table/table-body');
+var TableHeader = require('material-ui/lib/table/table-header');
+var TableHeaderColumn = require('material-ui/lib/table/table-header-column');
+var TableRow = require('material-ui/lib/table/table-row');
+var TableRowColumn = require('material-ui/lib/table/table-row-column');
+var AppBar = require('material-ui/lib/app-bar');
+
 var BugFilter = require('./BugFilter');
 var BugAdd = require('./BugAdd');
 
 var BugRow = React.createClass({
+  getStyle: function(width, bug) {
+    var style = {height: 24};
+    if (width) style.width = width;
+    if (bug.priority == 'P1') style.color = 'red';
+    return style;
+  },
   render: function() {
-    console.log("Rendering BugRow:", this.props.bug);
+    //console.log("Rendering BugRow:", this.props.bug);
+    var bug = this.props.bug;
     return (
-      <tr>
-       <td>
-          <Link to={'/bugs/' + this.props.bug._id}>{this.props.bug._id}</Link>
-        </td>
-        <td>{this.props.bug._id}</td>
-        <td>{this.props.bug.status}</td>
-        <td>{this.props.bug.priority}</td>
-        <td>{this.props.bug.owner}</td>
-        <td>{this.props.bug.title}</td>
-      </tr>
+      <TableRow>
+        <TableRowColumn style={this.getStyle(180, bug)}>
+          <Link to={'/bugs/' + bug._id}>{bug._id}</Link>
+        </TableRowColumn>
+        <TableRowColumn style={this.getStyle(40, bug)}>{bug.status}</TableRowColumn>
+        <TableRowColumn style={this.getStyle(40, bug)}>{bug.priority}</TableRowColumn>
+        <TableRowColumn style={this.getStyle(60, bug)}>{bug.owner}</TableRowColumn>
+        <TableRowColumn style={this.getStyle(undefined, bug)}>{bug.title}</TableRowColumn>
+      </TableRow>
     )
   }
 });
 
 var BugTable = React.createClass({
   render: function() {
-    console.log("Rendering bug table, num items:", this.props.bugs.length);
+    //console.log("Rendering bug table, num items:", this.props.bugs.length);
     var bugRows = this.props.bugs.map(function(bug) {
       return <BugRow key={bug._id} bug={bug} />
     });
     return (
-      <table>
-        <thead>
-          <tr>
-            <th>Id</th>
-            <th>Status</th>
-            <th>Priority</th>
-            <th>Owner</th>
-            <th>Title</th>
-          </tr>
-        </thead>
-        <tbody>
-          {bugRows}
-        </tbody>
-      </table>
+      <Paper zDepth={1} style={{marginTop: 10, marginBottom: 10}}>
+        <Table>
+          <TableHeader displaySelectAll={false} adjustForCheckbox={false}>
+            <TableRow>
+              <TableHeaderColumn style={{width: 180}}>Id</TableHeaderColumn>
+              <TableHeaderColumn style={{width: 40}}>Status</TableHeaderColumn>
+              <TableHeaderColumn style={{width: 40}}>Priority</TableHeaderColumn>
+              <TableHeaderColumn style={{width: 60}}>Owner</TableHeaderColumn>
+              <TableHeaderColumn>Title</TableHeaderColumn>
+            </TableRow>
+          </TableHeader>
+          <TableBody stripedRows={true}>
+            {bugRows}
+          </TableBody>
+        </Table>
+      </Paper>
     )
   }
 });
@@ -54,34 +71,47 @@ var BugList = React.createClass({
     return {bugs: []};
   },
   render: function() {
-    console.log("Rendering bug list, num items:", this.state.bugs.length);
+    console.log("Rendering BugList, num items:", this.state.bugs.length);
     return (
       <div>
-        <h1>Bug Tracker</h1>
-        
+        <AppBar title="React Bug Tracker" showMenuIconButton={false}/>
         <BugFilter submitHandler={this.changeFilter} initFilter={this.props.location.query}/>
-        <hr />
         <BugTable bugs={this.state.bugs}/>
-        <hr />
         <BugAdd addBug={this.addBug} />
       </div>
     )
   },
 
-  changeFilter: function(newFilter) {
-    this.props.history.push({search: '?' + $.param(newFilter)});
-    this.loadData(newFilter);
- },
-
-   componentDidMount: function() {
-    this.loadData({});
+  componentDidMount: function() {
+    console.log("BugList: componentDidMount");
+    this.loadData();
   },
 
-   loadData: function(filter) {
+  componentDidUpdate: function(prevProps) {
+    var oldQuery = prevProps.location.query;
+    var newQuery = this.props.location.query;
+    if (oldQuery.priority === newQuery.priority &&
+        oldQuery.status === newQuery.status) {
+      console.log("BugList: componentDidUpdate, no change in filter, not updating");
+      return;
+    } else {
+      console.log("BugList: componentDidUpdate, loading data with new filter");
+      this.loadData();
+    }
+  },
+
+  loadData: function() {
+    var query = this.props.location.query || {};
+    var filter = {priority: query.priority, status: query.status};
+
     $.ajax('/api/bugs', {data: filter}).done(function(data) {
       this.setState({bugs: data});
     }.bind(this));
     // In production, we'd also handle errors.
+  },
+
+  changeFilter: function(newFilter) {
+    this.props.history.push({search: '?' + $.param(newFilter)});
   },
 
   addBug: function(bug) {

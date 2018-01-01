@@ -13,7 +13,6 @@
     "tutorial",
     "MERN"
   ],
-  "homepage": "https://github.com/vasansr/react-tutorial-mern#readme",
   "dependencies": {
     "babel-preset-react": "^6.3.13",
     "babelify": "^7.2.0",
@@ -23,11 +22,13 @@
     "gulp": "^3.9.0",
     "history": "^1.17.0",
     "jquery": "^2.1.4",
+    "material-ui": "^0.14.0",
     "mongodb": "^2.1.2",
     "react": "^0.14.5",
     "react-bootstrap": "^0.28.1",
     "react-dom": "^0.14.5",
     "react-router": "^1.0.3",
+    "react-tap-event-plugin": "^0.2.1",
     "vinyl-source-stream": "^1.1.0",
     "watchify": "^3.6.1"
   }
