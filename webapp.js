@@ -14,9 +14,14 @@ app.use(express.static('static'));
 // ];
 
 app.get('/api/bugs', function(req, res) {
-  // res.json(bugData);
-  db.collection("bugs").find().toArray(function(err, docs) {
-        if (err) { return next(err); }
+  console.log("Query string", req.query);
+  var filter = {};
+  if (req.query.priority)
+    filter.priority = req.query.priority;
+  if (req.query.status)
+    filter.status = req.query.status;
+
+  db.collection("bugs").find(filter).toArray(function(err, docs) {
     res.json(docs);
   });
 });

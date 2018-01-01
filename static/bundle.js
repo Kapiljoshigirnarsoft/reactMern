@@ -29115,11 +29115,18 @@ var BugFilter = React.createClass({
 
   render: function () {
     console.log("Rendering BugFilter");
-    return React.createElement(
-      'div',
-      null,
-      'A way to filter the list of bugs would come here.'
+    return (
+      // <div>A way to filter the list of bugs would come here.</div>
+      React.createElement(
+        'button',
+        { onClick: this.submit },
+        'Test Filter'
+      )
     );
+  },
+
+  submit: function (e) {
+    this.props.submitHandler({ priority: "P1" });
   }
 });
 
@@ -29239,7 +29246,7 @@ var BugList = React.createClass({
         null,
         'Bug Tracker'
       ),
-      React.createElement(BugFilter, null),
+      React.createElement(BugFilter, { submitHandler: this.loadData }),
       React.createElement('hr', null),
       React.createElement(BugTable, { bugs: this.state.bugs }),
       React.createElement('hr', null),
@@ -29248,7 +29255,11 @@ var BugList = React.createClass({
   },
 
   componentDidMount: function () {
-    $.ajax('/api/bugs').done(function (data) {
+    this.loadData({});
+  },
+
+  loadData: function (filter) {
+    $.ajax('/api/bugs', { data: filter }).done(function (data) {
       this.setState({ bugs: data });
     }.bind(this));
     // In production, we'd also handle errors.
