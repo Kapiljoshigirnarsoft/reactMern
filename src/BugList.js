@@ -1,6 +1,7 @@
 var React = require('react');
 var ReactDOM = require('react-dom');
 var $ = require('jquery');
+var Link = require('react-router').Link;
 
 var BugFilter = require('./BugFilter');
 var BugAdd = require('./BugAdd');
@@ -10,6 +11,9 @@ var BugRow = React.createClass({
     console.log("Rendering BugRow:", this.props.bug);
     return (
       <tr>
+       <td>
+          <Link to={'/bugs/' + this.props.bug._id}>{this.props.bug._id}</Link>
+        </td>
         <td>{this.props.bug._id}</td>
         <td>{this.props.bug.status}</td>
         <td>{this.props.bug.priority}</td>
@@ -55,7 +59,7 @@ var BugList = React.createClass({
       <div>
         <h1>Bug Tracker</h1>
         
-        <BugFilter submitHandler={this.loadData} initFilter={this.props.location.query}/>
+        <BugFilter submitHandler={this.changeFilter} initFilter={this.props.location.query}/>
         <hr />
         <BugTable bugs={this.state.bugs}/>
         <hr />
@@ -63,6 +67,11 @@ var BugList = React.createClass({
       </div>
     )
   },
+
+  changeFilter: function(newFilter) {
+    this.props.history.push({search: '?' + $.param(newFilter)});
+    this.loadData(newFilter);
+ },
 
    componentDidMount: function() {
     this.loadData({});

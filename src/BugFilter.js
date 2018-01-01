@@ -5,9 +5,7 @@ var BugFilter = React.createClass({
   render: function() {
     console.log("Rendering BugFilter");
     return (
-      // <div>A way to filter the list of bugs would come here.</div>
-      // <button onClick={this.submit}>Test Filter</button>
-	<div>
+      <div>
         <h3>Filter</h3>
         Status:
         <select value={this.state.status} onChange={this.onChangeStatus}>
@@ -27,12 +25,12 @@ var BugFilter = React.createClass({
         <br/>
         <button onClick={this.submit}>Apply</button>
       </div>
-
     )
   },
-getInitialState: function() {
-     var initFilter = this.props.initFilter;
-     return {status: initFilter.status, priority: initFilter.priority};
+
+  getInitialState: function() {
+    var initFilter = this.props.initFilter;
+    return {status: initFilter.status, priority: initFilter.priority};
   },
 
   onChangeStatus: function(e) {
@@ -43,9 +41,11 @@ getInitialState: function() {
   },
 
   submit: function(e) {
-    this.props.submitHandler({priority: this.state.priority, status: this.state.status});
+    var newFilter = {};
+    if (this.state.priority) newFilter.priority = this.state.priority;
+    if (this.state.status) newFilter.status = this.state.status;
+    this.props.submitHandler(newFilter);
   }
-  
 });
 
 module.exports = BugFilter;
