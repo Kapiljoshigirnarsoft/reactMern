@@ -1,3 +1,5 @@
+node_modules
+static/App.js
 .DS_STORE
 node_modules
 *~

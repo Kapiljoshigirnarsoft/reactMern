@@ -1,6 +1,6 @@
 var BugFilter = React.createClass({
   render: function() {
-  	console.log("Rendering BugFilter");
+    console.log("Rendering BugFilter");
     return (
       <div>A way to filter the list of bugs would come here.</div>
     )
@@ -9,10 +9,11 @@ var BugFilter = React.createClass({
 
 var BugRow = React.createClass({
   render: function() {
-  	console.log("Rendering BugRow:", this.props.bug);
+    console.log("Rendering BugRow:", this.props.bug);
     return (
       <tr>
-        <td>{this.props.bug.id}</td>
+        // <td>{this.props.bug.id}</td>
+        <td>{this.props.bug._id}</td>
         <td>{this.props.bug.status}</td>
         <td>{this.props.bug.priority}</td>
         <td>{this.props.bug.owner}</td>
@@ -24,9 +25,9 @@ var BugRow = React.createClass({
 
 var BugTable = React.createClass({
   render: function() {
-  	 console.log("Rendering bug table, num items:", this.props.bugs.length);
+    console.log("Rendering bug table, num items:", this.props.bugs.length);
     var bugRows = this.props.bugs.map(function(bug) {
-      return <BugRow key={bug.id} bug={bug} />
+      return <BugRow key={bug._id} bug={bug} />
     });
     return (
       <table>
@@ -49,37 +50,33 @@ var BugTable = React.createClass({
 
 var BugAdd = React.createClass({
   render: function() {
-  	console.log("Rendering BugAdd");
+    console.log("Rendering BugAdd");
     return (
-      <form name="bugAdd">
-        <input type="text" name="owner" placeholder="Owner"/>
-        <input type="text" name="title" placeholder="Title"/>
-        <button onClick={this.handlesubmit} >Add Bug</button>
-      </form>
-
+      <div>
+        <form name="bugAdd">
+          <input type="text" name="owner" placeholder="Owner" />
+          <input type="text" name="title" placeholder="Title" />
+          <button onClick={this.handleSubmit}>Add Bug</button>
+        </form>
+      </div>
     )
   },
 
-  handlesubmit: function(e){
+  handleSubmit: function(e) {
     e.preventDefault();
     var form = document.forms.bugAdd;
     this.props.addBug({owner: form.owner.value, title: form.title.value, status: 'New', priority: 'P1'});
-    form.owner.value = ""; form.title.value = ""; 
+    // clear the form for the next input
+    form.owner.value = ""; form.title.value = "";
   }
 });
 
-var bugData = [
-  {id: 1, priority: 'P1', status:'Open', owner:'Ravan', title:'App crashes on open'},
-  {id: 2, priority: 'P2', status:'New', owner:'Eddie', title:'Misaligned border on panel'},
-  {id: 3, priority: 'P3', status:'New', owner:'kapil', title:'Misaligned border on panel'},
-];
-
 var BugList = React.createClass({
   getInitialState: function() {
-    return {bugs: bugData};
+    return {bugs: []};
   },
   render: function() {
-  	console.log("Rendering bug list, num items:", this.state.bugs.length);
+    console.log("Rendering bug list, num items:", this.state.bugs.length);
     return (
       <div>
         <h1>Bug Tracker</h1>
@@ -92,19 +89,30 @@ var BugList = React.createClass({
     )
   },
 
-  // testNewBug: function(){
-  // 	var nextId = this.state.bugs.length + 1;
-  // 	this.addBug({id:nextID, priority:'p2', owner:'Pieta', title:'warning on mobile' })
-  // },
+  componentDidMount: function() {
+    $.ajax('/api/bugs').done(function(data) {
+      this.setState({bugs: data});
+    }.bind(this));
+    // In production, we'd also handle errors.
+  },
 
   addBug: function(bug) {
     console.log("Adding bug:", bug);
-    // We're advised not to modify the state, it's immutable. So, make a copy.
-    var bugsModified = this.state.bugs.slice();
-    bug.id = this.state.bugs.length + 1;
-    bugsModified.push(bug);
-    this.setState({bugs: bugsModified});
-   }
+    $.ajax({
+      type: 'POST', url: '/api/bugs', contentType: 'application/json',
+      data: JSON.stringify(bug),
+      success: function(data) {
+        var bug = data;
+        // We're advised not to modify the state, it's immutable. So, make a copy.
+        var bugsModified = this.state.bugs.concat(bug);
+        this.setState({bugs: bugsModified});
+      }.bind(this),
+      error: function(xhr, status, err) {
+        // ideally, show error to user.
+        console.log("Error adding bug:", err);
+      }
+    });
+  }
 });
 
 ReactDOM.render(
